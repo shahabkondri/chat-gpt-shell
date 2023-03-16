@@ -44,3 +44,31 @@ jobs:
         with:
           name: chat-gpt-cli-${{ matrix.os }}
           path: target/chat-gpt-cli
+          
+  create_release:
+    needs: native_build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Download and upload native images
+      run: |
+        for image_name in chat-gpt-cli-macos-intel chat-gpt-cli-linux-x64; do
+          echo "Downloading and uploading ${image_name}"
+          wget -O ${image_name} https://github.com/${{ github.repository }}/actions/artifacts/${{ github.run_id }}/${image_name}/0
+          gh release upload ${{ github.ref }} ${image_name}
+        done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
