@@ -63,12 +63,17 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Download and upload native images
+    - name: Download native images
+      uses: actions/download-artifact@v2
+      with:
+        name: chat-gpt-cli-${{ matrix.os }}
+        path: artifacts
+
+    - name: Upload native images
       run: |
         for image_name in chat-gpt-cli-macos-intel chat-gpt-cli-linux-x64; do
-          echo "Downloading and uploading ${image_name}"
-          wget -O ${image_name} https://github.com/${{ github.repository }}/actions/artifacts/${{ github.run_id }}/${image_name}/0
-          gh release upload ${{ github.ref }} ${image_name}
+          echo "Uploading ${image_name}"
+          gh release upload ${{ github.ref }} artifacts/${image_name}
         done
       env:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
