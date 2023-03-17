@@ -84,7 +84,8 @@ jobs:
         run: |
           for artifact_name in chat-gpt-cli-macos-intel chat-gpt-cli-linux64; do
             echo "Uploading ${artifact_name}"
-            gh release upload ${{ steps.extract_tag.outputs.tag }} artifacts/${artifact_name}/chat-gpt-cli
+            cp artifacts/${artifact_name}/chat-gpt-cli artifacts/${artifact_name}/${artifact_name}
+            gh release upload ${{ steps.extract_tag.outputs.tag }} artifacts/${artifact_name}/${artifact_name}
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
