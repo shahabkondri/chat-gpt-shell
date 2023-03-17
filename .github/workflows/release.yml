@@ -46,6 +46,7 @@ jobs:
           path: target/chat-gpt-cli
           
   create_release:
+    permissions: write-all
     needs: native_build
     runs-on: ubuntu-latest
     steps:
