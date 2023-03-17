@@ -52,14 +52,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Extract tag name
+        id: extract_tag
+        run: |
+          echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.extract_tag.outputs.tag }}
+          release_name: Release ${{ steps.extract_tag.outputs.tag }}
           draft: false
           prerelease: false
 
@@ -79,7 +84,7 @@ jobs:
         run: |
           for artifact_name in chat-gpt-cli-macos-intel chat-gpt-cli-linux64; do
             echo "Uploading ${artifact_name}"
-            gh release upload ${{ github.ref }} artifacts/${artifact_name}
+            gh release upload ${{ steps.extract_tag.outputs.tag }} artifacts/${artifact_name}
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
