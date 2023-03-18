@@ -1,5 +1,6 @@
 package com.shahabkondri.chatgpt.cli;
 
+import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -12,7 +13,9 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 public class ChatGptCliApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.exit(SpringApplication.run(ChatGptCliApplication.class, args));
+		SpringApplication app = new SpringApplication(ChatGptCliApplication.class);
+		app.setBannerMode(Banner.Mode.OFF);
+		SpringApplication.exit(app.run());
 	}
 
 }
