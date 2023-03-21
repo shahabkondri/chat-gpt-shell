@@ -1,4 +1,4 @@
-package com.shahabkondri.chatgpt.cli.command;
+package com.shahabkondri.chatgpt.cli.shell;
 
 import org.jline.terminal.Terminal;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class TerminalPrinter {
 	}
 
 	public void newLine() {
-		print(System.lineSeparator());
+		terminal.writer().println();
 	}
 
 }
