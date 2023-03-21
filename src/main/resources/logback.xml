@@ -3,6 +3,5 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <!-- Set the root logger level to OFF -->
-    <root level="OFF">
-    </root>
+    <root level="OFF" />
 </configuration>
