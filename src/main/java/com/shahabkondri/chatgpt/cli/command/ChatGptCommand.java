@@ -39,6 +39,8 @@ public class ChatGptCommand {
 
 	private static final Pattern NEW_LINE_PATTERN = Pattern.compile("\n\n");
 
+	private static final Duration CHAT_TIMEOUT = Duration.ofSeconds(30);
+
 	public ChatGptCommand(ChatGptClient chatGptClient, TerminalPrinter terminalPrinter,
 			ChatGptProperties chatGptProperties, Spinner spinner) {
 		this.chatGptClient = chatGptClient;
@@ -50,7 +52,7 @@ public class ChatGptCommand {
 	@ShellMethod(key = { "chat", "c" }, value = "Interacts with the ChatGPT API by sending a"
 			+ " user message and processing the AI-generated response as a stream")
 	public void chat(@ShellOption(arity = Integer.MAX_VALUE) String... prompt) {
-		spinner.startSpinner(100);
+		spinner.startSpinner();
 		String message = String.join(" ", prompt);
 		messages.add(new ChatGptRequest.Message(MessageRole.USER, message));
 		ChatGptRequest request = new ChatGptRequest(chatGptProperties.getModel(), messages);
@@ -66,7 +68,7 @@ public class ChatGptCommand {
 					if (error instanceof DecodingException && o.toString().contains("[DONE]")) {
 						terminalPrinter.newLine();
 					}
-				}).publishOn(Schedulers.parallel()).timeout(Duration.ofMillis(10000)).doFinally(signal -> {
+				}).publishOn(Schedulers.parallel()).timeout(CHAT_TIMEOUT).doFinally(signal -> {
 					ChatGptRequest.Message assistantMessage = new ChatGptRequest.Message(MessageRole.ASSISTANT,
 							builder.toString());
 					messages.add(assistantMessage);
@@ -75,7 +77,7 @@ public class ChatGptCommand {
 					// Stop the spinner if the timeout occurred
 					if (signal == SignalType.ON_ERROR && latch.getCount() == 0) {
 						spinner.stopSpinner();
-						terminalPrinter.print("The chat session timed out. Please try again.");
+						terminalPrinter.print("Oops, something went wrong. Please try again.");
 						terminalPrinter.newLine();
 					}
 				}).subscribe(terminalPrinter::print);

@@ -11,6 +11,8 @@ public class Spinner {
 
 	private static final char[] SPINNER_FRAMES = { '⣾', '⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽' };
 
+	private static final long SPINNER_SCHEDULER_PERIOD = 100;
+
 	private final AtomicBoolean isSpinnerRunning = new AtomicBoolean(false);
 
 	private final TerminalPrinter terminalPrinter;
@@ -23,7 +25,7 @@ public class Spinner {
 		this.terminalPrinter = terminalPrinter;
 	}
 
-	public void startSpinner(long delay) {
+	public void startSpinner() {
 		if (isSpinnerRunning.compareAndSet(false, true)) {
 			spinnerExecutorService = Executors.newSingleThreadScheduledExecutor();
 			AtomicInteger index = new AtomicInteger(0);
@@ -32,7 +34,7 @@ public class Spinner {
 					int i = index.getAndIncrement() % SPINNER_FRAMES.length;
 					terminalPrinter.print("\r" + SPINNER_FRAMES[i]);
 				}
-			}, 0, delay, TimeUnit.MILLISECONDS);
+			}, 0, SPINNER_SCHEDULER_PERIOD, TimeUnit.MILLISECONDS);
 		}
 	}
 
