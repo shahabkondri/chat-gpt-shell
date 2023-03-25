@@ -6,7 +6,6 @@ import com.shahabkondri.chatgpt.api.model.MessageRole;
 import com.shahabkondri.chatgpt.cli.configuration.ChatGptProperties;
 import com.shahabkondri.chatgpt.cli.shell.Spinner;
 import com.shahabkondri.chatgpt.cli.shell.TerminalPrinter;
-import org.springframework.core.codec.DecodingException;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -64,11 +63,9 @@ public class ChatGptCommand {
 		chatGptClient.completions(request).filter(response -> response.choices().get(0).delta().content() != null)
 				.doOnNext(__ -> spinner.stopSpinner())
 				.map(response -> normalizeOutput(response.choices().get(0).delta().content(), isFirstResultPrinted))
-				.doOnNext(builder::append).onErrorContinue((error, o) -> {
-					if (error instanceof DecodingException && o.toString().contains("[DONE]")) {
-						terminalPrinter.newLine();
-					}
-				}).publishOn(Schedulers.parallel()).timeout(CHAT_TIMEOUT).doFinally(signal -> {
+				.doOnNext(builder::append)
+				.publishOn(Schedulers.parallel()).timeout(CHAT_TIMEOUT).doFinally(signal -> {
+					terminalPrinter.newLine();
 					ChatGptRequest.Message assistantMessage = new ChatGptRequest.Message(MessageRole.ASSISTANT,
 							builder.toString());
 					messages.add(assistantMessage);
