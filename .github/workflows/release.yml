@@ -118,8 +118,14 @@ jobs:
       - name: Upload native images and JAR to the release
         run: |
           gh release upload ${{ steps.extract_tag.outputs.tag }} \
-            artifacts/chat-gpt-cli-jar/chat-gpt-cli-*.jar \
             artifacts/chat-gpt-cli-macos-intel/chat-gpt-cli \
-            artifacts/chat-gpt-cli-linux64/chat-gpt-cli
+            --name "chat-gpt-cli-macos-intel" \
+            artifacts/chat-gpt-cli-linux64/chat-gpt-cli \
+            --name "chat-gpt-cli-linux64"
+          
+          for jar_file in artifacts/chat-gpt-cli-jar/chat-gpt-cli-*.jar; do
+            echo "Uploading ${jar_file}"
+            gh release upload ${{ steps.extract_tag.outputs.tag }} "${jar_file}"
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
