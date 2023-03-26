@@ -4,15 +4,28 @@ import com.shahabkondri.chatgpt.api.client.ChatGptClient;
 import com.shahabkondri.chatgpt.api.model.ChatGptRequest;
 import com.shahabkondri.chatgpt.api.model.MessageRole;
 import com.shahabkondri.chatgpt.cli.configuration.ChatGptProperties;
-import org.springframework.core.codec.DecodingException;
+import com.shahabkondri.chatgpt.cli.shell.Spinner;
+import com.shahabkondri.chatgpt.cli.shell.TerminalPrinter;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+import reactor.core.publisher.SignalType;
+import reactor.core.scheduler.Schedulers;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
+ * A {@link ShellComponent} that facilitates user interaction with ChatGPT through the
+ * terminal. Offers commands for sending messages to the API, processing AI-generated
+ * responses as a stream, and managing chat history. Streamlines the process of obtaining
+ * and displaying AI-generated responses in real-time.
+ *
  * @author Shahab Kondri
  */
 @ShellComponent
@@ -22,38 +35,100 @@ public class ChatGptCommand {
 
 	private final TerminalPrinter terminalPrinter;
 
-	private final List<ChatGptRequest.Message> messages = new CopyOnWriteArrayList<>();
-
 	private final ChatGptProperties chatGptProperties;
 
+	private final Spinner spinner;
+
+	private final List<ChatGptRequest.Message> messages = new CopyOnWriteArrayList<>();
+
+	private static final Pattern NEW_LINE_PATTERN = Pattern.compile("\n\n");
+
+	private static final Duration CHAT_TIMEOUT = Duration.ofSeconds(30);
+
+	/**
+	 * Constructs a new ChatGptCommand with the specified client, printer, properties, and
+	 * spinner.
+	 * @param chatGptClient The ChatGPT client for interacting with the API.
+	 * @param terminalPrinter The terminal printer for printing messages.
+	 * @param chatGptProperties The properties for the ChatGPT API.
+	 * @param spinner The spinner for showing loading state.
+	 */
 	public ChatGptCommand(ChatGptClient chatGptClient, TerminalPrinter terminalPrinter,
-			ChatGptProperties chatGptProperties) {
+			ChatGptProperties chatGptProperties, Spinner spinner) {
 		this.chatGptClient = chatGptClient;
 		this.terminalPrinter = terminalPrinter;
 		this.chatGptProperties = chatGptProperties;
+		this.spinner = spinner;
 	}
 
-	@ShellMethod(key = "chat", value = "sends a message to a ChatGPT API client and returns the response.")
-	public void chat(@ShellOption ChatGptRequest.Message message) {
-		messages.add(message);
+	/**
+	 * Interacts with the ChatGPT API by sending a user message and processing the
+	 * AI-generated response as a stream. To use this command in the terminal, type 'chat'
+	 * or 'c', followed by your message. For example: <pre>
+	 * :> chat Hello ChatGPT, can you help me with my question?
+	 * </pre> or <pre>
+	 * :> c Hello ChatGPT, can you help me with my question?
+	 * </pre>
+	 * @param prompt The user input to send to the ChatGPT API.
+	 */
+	@ShellMethod(key = { "chat", "c" }, value = "Interacts with the ChatGPT API by sending a"
+			+ " user message and processing the AI-generated response as a stream")
+	public void chat(@ShellOption(arity = Integer.MAX_VALUE) String... prompt) {
+		spinner.startSpinner();
+		String message = String.join(" ", prompt);
+		messages.add(new ChatGptRequest.Message(MessageRole.USER, message));
+		ChatGptRequest request = new ChatGptRequest(chatGptProperties.model(), messages);
 
-		ChatGptRequest request = new ChatGptRequest(chatGptProperties.getModel(), messages);
-
+		AtomicBoolean isFirstResultPrinted = new AtomicBoolean(false);
 		StringBuilder builder = new StringBuilder();
+		CountDownLatch latch = new CountDownLatch(1);
+
 		chatGptClient.completions(request).filter(response -> response.choices().get(0).delta().content() != null)
-				.map(response -> response.choices().get(0).delta().content()).doOnNext(response -> {
-					terminalPrinter.print(response);
-					builder.append(response);
-				}).onErrorContinue((error, o) -> {
-					if (error instanceof DecodingException && o.toString().contains("[DONE]")) {
+				.doOnNext(__ -> spinner.stopSpinner())
+				.map(response -> normalizeOutput(response.choices().get(0).delta().content(), isFirstResultPrinted))
+				.doOnNext(builder::append).publishOn(Schedulers.parallel()).timeout(CHAT_TIMEOUT).doFinally(signal -> {
+					terminalPrinter.newLine();
+					ChatGptRequest.Message assistantMessage = new ChatGptRequest.Message(MessageRole.ASSISTANT,
+							builder.toString());
+					messages.add(assistantMessage);
+					latch.countDown();
+
+					// Stop the spinner if the timeout occurred
+					if (signal == SignalType.ON_ERROR && latch.getCount() == 0) {
+						spinner.stopSpinner();
+						terminalPrinter.print("Oops, something went wrong. Please try again.");
 						terminalPrinter.newLine();
 					}
-				}).collectList().block();
-
-		ChatGptRequest.Message assistantMessage = new ChatGptRequest.Message(MessageRole.ASSISTANT, builder.toString());
-		messages.add(assistantMessage);
+				}).subscribe(terminalPrinter::print);
+		try {
+			latch.await();
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
+	/**
+	 * Normalizes the output generated by the ChatGPT API, removing unnecessary new lines.
+	 * @param output The output generated by the ChatGPT API.
+	 * @param isFirstResultPrinted An atomic boolean flag to check if this is the first
+	 * result printed.
+	 * @return The normalized output string.
+	 */
+	private static String normalizeOutput(String output, AtomicBoolean isFirstResultPrinted) {
+		Matcher matcher = NEW_LINE_PATTERN.matcher(output);
+		if (matcher.matches()) {
+			if (!isFirstResultPrinted.getAndSet(true)) {
+				return matcher.replaceAll("");
+			}
+			return matcher.replaceAll("\n");
+		}
+		return output;
+	}
+
+	/**
+	 * Clears the chat history by removing all messages from the messages list.
+	 */
 	@ShellMethod(key = "chat --clear", value = "Clear chat history.")
 	public void clearChat() {
 		messages.clear();

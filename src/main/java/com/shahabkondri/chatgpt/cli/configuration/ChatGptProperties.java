@@ -5,19 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
+ * {@link ConfigurationProperties properties} that holds properties related to the ChatGPT
+ * API, such as the text completion model to be used. These properties can be set using
+ * the 'chat.gpt' prefix in the configuration file.
+ *
  * @author Shahab Kondri
  */
 @ConfigurationProperties(prefix = "chat.gpt")
-public class ChatGptProperties {
-
-	private final TextCompletionModel model;
-
-	public ChatGptProperties(@DefaultValue("GPT_4_32_K") TextCompletionModel model) {
-		this.model = model;
-	}
-
-	public TextCompletionModel getModel() {
-		return model;
-	}
-
+public record ChatGptProperties(@DefaultValue("GPT_3_5_TURBO") TextCompletionModel model) {
 }
