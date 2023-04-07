@@ -10,13 +10,13 @@
 	</parent>
 
 	<groupId>com.shahabkondri</groupId>
-	<artifactId>chat-gpt-cli</artifactId>
-	<version>1.0.2</version>
+	<artifactId>chat-gpt-shell</artifactId>
+	<version>1.0.3</version>
 	<packaging>jar</packaging>
 
-	<name>chat-gpt-cli</name>
-	<description>ChatGPT CLI</description>
-	<url>https://github.com/shahabkondri/chat-gpt-cli</url>
+	<name>chat-gpt-shell</name>
+	<description>ChatGPT Shell</description>
+	<url>https://github.com/shahabkondri/chat-gpt-shell</url>
 
 	<licenses>
 		<license>
@@ -34,14 +34,14 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git://github.com/shahabkondri/chat-gpt-cli.git</connection>
-		<developerConnection>scm:git:ssh://github.com:shahabkondri/chat-gpt-cli.git</developerConnection>
-		<url>https://github.com/shahabkondri/chat-gpt-cli/tree/master</url>
+		<connection>scm:git:git://github.com/shahabkondri/chat-gpt-shell.git</connection>
+		<developerConnection>scm:git:ssh://github.com:shahabkondri/chat-gpt-shell.git</developerConnection>
+		<url>https://github.com/shahabkondri/chat-gpt-shell/tree/master</url>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/shahabkondri/chat-gpt-cli/issues</url>
+		<url>https://github.com/shahabkondri/chat-gpt-shell/issues</url>
 	</issueManagement>
 
 	<properties>

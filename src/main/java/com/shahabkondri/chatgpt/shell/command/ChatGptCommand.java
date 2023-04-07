@@ -1,15 +1,16 @@
-package com.shahabkondri.chatgpt.cli.command;
+package com.shahabkondri.chatgpt.shell.command;
 
 import com.shahabkondri.chatgpt.api.client.ChatGptClient;
 import com.shahabkondri.chatgpt.api.model.ChatGptRequest;
 import com.shahabkondri.chatgpt.api.model.MessageRole;
-import com.shahabkondri.chatgpt.cli.configuration.ChatGptProperties;
-import com.shahabkondri.chatgpt.cli.shell.Spinner;
-import com.shahabkondri.chatgpt.cli.shell.TerminalPrinter;
+import com.shahabkondri.chatgpt.shell.configuration.ChatGptProperties;
+import com.shahabkondri.chatgpt.shell.shell.Spinner;
+import com.shahabkondri.chatgpt.shell.shell.TerminalPrinter;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import reactor.core.publisher.SignalType;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
@@ -63,15 +64,15 @@ public class ChatGptCommand {
 
 	/**
 	 * Interacts with the ChatGPT API by sending a user message and processing the
-	 * AI-generated response as a stream. To use this command in the terminal, type 'chat'
-	 * or 'c', followed by your message. For example: <pre>
+	 * AI-generated response as a stream. To use this command in the terminal, type
+	 * 'chat', followed by your message. For example: <pre>
 	 * :> chat Hello ChatGPT, can you help me with my question?
 	 * </pre> or <pre>
 	 * :> c Hello ChatGPT, can you help me with my question?
 	 * </pre>
 	 * @param prompt The user input to send to the ChatGPT API.
 	 */
-	@ShellMethod(key = { "chat", "c" }, value = "Interacts with the ChatGPT API by sending a"
+	@ShellMethod(key = { "chat" }, value = "Interacts with the ChatGPT API by sending a"
 			+ " user message and processing the AI-generated response as a stream")
 	public void chat(@ShellOption(arity = Integer.MAX_VALUE) String... prompt) {
 		spinner.startSpinner();
@@ -92,13 +93,10 @@ public class ChatGptCommand {
 							builder.toString());
 					messages.add(assistantMessage);
 					latch.countDown();
-
-					// Stop the spinner if the timeout occurred
-					if (signal == SignalType.ON_ERROR && latch.getCount() == 0) {
-						spinner.stopSpinner();
-						terminalPrinter.print("Oops, something went wrong. Please try again.");
-						terminalPrinter.newLine();
-					}
+				}).onErrorResume(throwable -> {
+					spinner.stopSpinner();
+					handleApiException(throwable);
+					return Mono.empty();
 				}).subscribe(terminalPrinter::print);
 		try {
 			latch.await();
@@ -133,6 +131,17 @@ public class ChatGptCommand {
 	public void clearChat() {
 		messages.clear();
 		terminalPrinter.print("Chat history is cleared.");
+		terminalPrinter.newLine();
+	}
+
+	private void handleApiException(Throwable throwable) {
+		if (throwable instanceof WebClientResponseException.TooManyRequests) {
+			terminalPrinter
+					.print("There might be an issue with your API key." + " Please check your API key and try again.");
+		}
+		else {
+			terminalPrinter.print("Oops, something went wrong. Please try again.");
+		}
 		terminalPrinter.newLine();
 	}
 
