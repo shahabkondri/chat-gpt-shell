@@ -59,10 +59,10 @@ After starting the application, you will see a terminal prompt:
 :> 
 ```
 
-Enter your message and press Enter to send it to the ChatGPT API. The AI-generated response will be displayed in the terminal. To exit the application, type exit and press Enter.
+Enter your message and press Enter to send it to the ChatGPT API. The AI-generated response will be displayed in the terminal. To access other commands, start your input with a colon (':') character, for example :help to display the available commands or :exit to quit the application.
 
 ```bash
-:> chat tell me a joke.
+:> tell me a joke.
 ```
 
 ## License

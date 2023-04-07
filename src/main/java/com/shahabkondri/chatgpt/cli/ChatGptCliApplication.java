@@ -27,7 +27,8 @@ public class ChatGptCliApplication {
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(ChatGptCliApplication.class);
 		app.setBannerMode(Banner.Mode.OFF);
-		app.setDefaultProperties(Map.of("server.port", "0"));
+		app.setDefaultProperties(Map.of("server.port", "0", "spring.shell.command.stacktrace.enabled", "false",
+				"spring.shell.command.history.enabled", "false", "spring.shell.command.script.enabled", "false"));
 		ConfigurableApplicationContext context = app.run(args);
 		SpringApplication.exit(context);
 	}
