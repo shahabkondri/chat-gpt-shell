@@ -1,4 +1,4 @@
-package com.shahabkondri.chatgpt.cli.shell;
+package com.shahabkondri.chatgpt.shell.shell;
 
 import org.jline.terminal.Terminal;
 import org.springframework.stereotype.Component;

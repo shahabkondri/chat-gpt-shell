@@ -1,6 +1,6 @@
-package com.shahabkondri.chatgpt.cli.configuration;
+package com.shahabkondri.chatgpt.shell.configuration;
 
-import com.shahabkondri.chatgpt.cli.command.ChatGptCommand;
+import com.shahabkondri.chatgpt.shell.command.ChatGptCommand;
 import org.jline.terminal.Terminal;
 import org.springframework.context.annotation.Primary;
 import org.springframework.shell.Input;

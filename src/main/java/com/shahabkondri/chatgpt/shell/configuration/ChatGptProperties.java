@@ -1,4 +1,4 @@
-package com.shahabkondri.chatgpt.cli.configuration;
+package com.shahabkondri.chatgpt.shell.configuration;
 
 import com.shahabkondri.chatgpt.api.model.TextCompletionModel;
 import org.springframework.boot.context.properties.ConfigurationProperties;

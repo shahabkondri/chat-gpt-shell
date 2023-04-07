@@ -1,5 +1,5 @@
-# ChatGPT CLI
-ChatGPT CLI is a command-line interface for interacting with the ChatGPT API, built with Java, Spring Boot, and Spring Shell. It is a simple and easy-to-use tool that allows users to send messages and receive AI-generated responses.
+# ChatGPT Shell
+ChatGPT Shell is a command-line interface for interacting with the ChatGPT API, built with Java, Spring Boot, and Spring Shell. It is a simple and easy-to-use tool that allows users to send messages and receive AI-generated responses.
 
 ## Features
 - Customizable terminal prompt
@@ -22,8 +22,8 @@ You can set these values in the `application.properties` file or as environment 
 Clone the repository:
 
 ```bash
-git clone https://github.com/shahabkondri/chat-gpt-cli.git
-cd chat-gpt-cli
+git clone https://github.com/shahabkondri/chat-gpt-shell.git
+cd chat-gpt-shell
 ```
 
 To build the project, run:
@@ -35,7 +35,7 @@ To build the project, run:
 To run the application:
 
 ```bash
-java -jar target/chat-gpt-cli-1.0.2.jar
+java -jar target/chat-gpt-shell-1.0.3.jar
 ```
 
 ## Native Build
@@ -49,7 +49,7 @@ This will produce a standalone executable optimized for your platform.
 Once compiled, you can run the native executable:
 
 ```bash
-./target/chat-gpt-cli
+./target/chat-gpt-shell
 ```
 
 ## Usage

@@ -1,4 +1,4 @@
-package com.shahabkondri.chatgpt.cli.configuration;
+package com.shahabkondri.chatgpt.shell.configuration;
 
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;

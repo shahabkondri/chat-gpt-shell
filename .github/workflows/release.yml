@@ -30,8 +30,8 @@ jobs:
       - name: Upload JAR as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: chat-gpt-cli-jar
-          path: target/chat-gpt-cli-*.jar
+          name: chat-gpt-shell-jar
+          path: target/chat-gpt-shell-*.jar
 
   native_build:
     needs: jar_build
@@ -40,9 +40,9 @@ jobs:
       matrix:
         include:
           - os: macos-latest
-            artifact_name: chat-gpt-cli-macos-intel
+            artifact_name: chat-gpt-shell-macos-intel
           - os: ubuntu-latest
-            artifact_name: chat-gpt-cli-linux64
+            artifact_name: chat-gpt-shell-linux64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -72,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact_name }}
-          path: target/chat-gpt-cli
+          path: target/chat-gpt-shell
 
   create_release:
     needs: native_build
@@ -100,31 +100,31 @@ jobs:
       - name: Download JAR artifact
         uses: actions/download-artifact@v3
         with:
-          name: chat-gpt-cli-jar
-          path: artifacts/chat-gpt-cli-jar
+          name: chat-gpt-shell-jar
+          path: artifacts/chat-gpt-shell-jar
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: chat-gpt-cli-macos-intel
-          path: artifacts/chat-gpt-cli-macos-intel
+          name: chat-gpt-shell-macos-intel
+          path: artifacts/chat-gpt-shell-macos-intel
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: chat-gpt-cli-linux64
-          path: artifacts/chat-gpt-cli-linux64
+          name: chat-gpt-shell-linux64
+          path: artifacts/chat-gpt-shell-linux64
 
       - name: Upload native images and JAR to the release
         run: |
-          cp artifacts/chat-gpt-cli-macos-intel/chat-gpt-cli artifacts/chat-gpt-cli-macos-intel/chat-gpt-cli-macos-intel
-          cp artifacts/chat-gpt-cli-linux64/chat-gpt-cli artifacts/chat-gpt-cli-linux64/chat-gpt-cli-linux64
+          cp artifacts/chat-gpt-shell-macos-intel/chat-gpt-shell artifacts/chat-gpt-shell-macos-intel/chat-gpt-shell-macos-intel
+          cp artifacts/chat-gpt-shell-linux64/chat-gpt-shell artifacts/chat-gpt-shell-linux64/chat-gpt-shell-linux64
 
           gh release upload ${{ steps.extract_tag.outputs.tag }} \
-            artifacts/chat-gpt-cli-macos-intel/chat-gpt-cli-macos-intel \
-            artifacts/chat-gpt-cli-linux64/chat-gpt-cli-linux64
+            artifacts/chat-gpt-shell-macos-intel/chat-gpt-shell-macos-intel \
+            artifacts/chat-gpt-shell-linux64/chat-gpt-shell-linux64
 
-          for jar_file in artifacts/chat-gpt-cli-jar/chat-gpt-cli-*.jar; do
+          for jar_file in artifacts/chat-gpt-shell-jar/chat-gpt-shell-*.jar; do
             echo "Uploading ${jar_file}"
             gh release upload ${{ steps.extract_tag.outputs.tag }} "${jar_file}"
           done

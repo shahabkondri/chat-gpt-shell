@@ -1,11 +1,11 @@
-package com.shahabkondri.chatgpt.cli.command;
+package com.shahabkondri.chatgpt.shell.command;
 
 import com.shahabkondri.chatgpt.api.client.ChatGptClient;
 import com.shahabkondri.chatgpt.api.model.ChatGptRequest;
 import com.shahabkondri.chatgpt.api.model.MessageRole;
-import com.shahabkondri.chatgpt.cli.configuration.ChatGptProperties;
-import com.shahabkondri.chatgpt.cli.shell.Spinner;
-import com.shahabkondri.chatgpt.cli.shell.TerminalPrinter;
+import com.shahabkondri.chatgpt.shell.configuration.ChatGptProperties;
+import com.shahabkondri.chatgpt.shell.shell.Spinner;
+import com.shahabkondri.chatgpt.shell.shell.TerminalPrinter;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
