@@ -9,13 +9,15 @@ import com.shahabkondri.chatgpt.shell.shell.TerminalPrinter;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -40,7 +42,7 @@ public class ChatGptCommand {
 
 	private final Spinner spinner;
 
-	private final List<ChatGptRequest.Message> messages = new CopyOnWriteArrayList<>();
+	private final List<ChatGptRequest.Message> messages = new LinkedList<>();
 
 	private static final Pattern NEW_LINE_PATTERN = Pattern.compile("\n\n");
 
@@ -60,6 +62,10 @@ public class ChatGptCommand {
 		this.terminalPrinter = terminalPrinter;
 		this.chatGptProperties = chatGptProperties;
 		this.spinner = spinner;
+
+		if (StringUtils.hasLength(this.chatGptProperties.systemMessage())) {
+			messages.add(0, new ChatGptRequest.Message(MessageRole.SYSTEM, this.chatGptProperties.systemMessage()));
+		}
 	}
 
 	/**
@@ -104,6 +110,25 @@ public class ChatGptCommand {
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
+	}
+
+	/**
+	 * Sets or updates a system message that helps define the behavior of the ChatGPT
+	 * assistant. The system message can be changed at any time during the chat session,
+	 * affecting all subsequent interactions with the ChatGPT API. To use this command in
+	 * the terminal, type ':system', followed by the message. For example: <pre>
+	 * :> :system You are an AI trained to assist with programming questions.
+	 * </pre> The system message is added or updated at the beginning of the messages list
+	 * to ensure its influence on the assistant's behavior.
+	 * @param prompt The user input to set or update as the system message.
+	 */
+	@ShellMethod(key = "system", value = "The system message helps set the behavior of the assistant.")
+	public void systemMessage(@ShellOption(arity = Integer.MAX_VALUE) String... prompt) {
+		String message = String.join(" ", prompt);
+		Optional<ChatGptRequest.Message> sysMessage = messages.stream().filter(m -> m.role() == MessageRole.SYSTEM)
+				.findFirst();
+		sysMessage.ifPresent(messages::remove);
+		messages.add(0, new ChatGptRequest.Message(MessageRole.SYSTEM, message));
 	}
 
 	/**
