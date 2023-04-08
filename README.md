@@ -15,8 +15,14 @@ Before running the application, make sure to set the required configuration valu
 
 - `openai.api-key`: Set this to your OpenAI API key.
 - `chat.gpt.model`: Set this to the desired GPT model (e.g., `gpt_3_5_turbo`).
+- `chat.gpt.system-message`: Set this to the initial system message for the assistant (optional).
 
-You can set these values in the `application.properties` file or as environment variables.
+You can set these values in the `application.properties` file or as environment variables. When setting the system message using an environment variable, make sure to enclose the message in double quotes, like this:
+
+```bash
+export CHAT_GPT_SYSTEM_MESSAGE="You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."
+```
+
 
 ## How to Build and Run
 Clone the repository:
@@ -35,7 +41,7 @@ To build the project, run:
 To run the application:
 
 ```bash
-java -jar target/chat-gpt-shell-1.0.3.jar
+java -jar target/chat-gpt-shell-1.0.4.jar
 ```
 
 ## Native Build
@@ -60,6 +66,14 @@ After starting the application, you will see a terminal prompt:
 ```
 
 Enter your message and press Enter to send it to the ChatGPT API. The AI-generated response will be displayed in the terminal. To access other commands, start your input with a colon (':') character, for example :help to display the available commands or :exit to quit the application.
+
+To set or update a system message that helps define the behavior of the ChatGPT assistant, use the `:system` command followed by the message. For example:
+
+```bash
+:> :system You are an AI trained to assist with programming questions.
+```
+
+The system message is added or updated at the beginning of the messages list to ensure its influence on the assistant's behavior.
 
 ```bash
 :> tell me a joke.
