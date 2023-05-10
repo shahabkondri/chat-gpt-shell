@@ -32,11 +32,22 @@ public class TerminalPrinter {
 	}
 
 	/**
+	 * Prints the specified message to the terminal.
+	 * @param message The message to print to the terminal.
+	 */
+	public void println(String message) {
+		terminal.writer().printf(message);
+		terminal.flush();
+		newLine();
+	}
+
+	/**
 	 * Prints a newline to the terminal. This is useful for separating messages and
 	 * ensuring correct formatting when displaying output.
 	 */
 	public void newLine() {
 		terminal.writer().println();
+		terminal.flush();
 	}
 
 }
