@@ -45,7 +45,7 @@ To build the project, run:
 To run the application:
 
 ```bash
-java -jar target/chat-gpt-shell-1.0.4.jar
+java -jar target/chat-gpt-shell-1.0.5.jar
 ```
 
 ## Native Build
